@@ -29,6 +29,18 @@ public class UserEntity {
     @OneToMany(mappedBy = "user")
     private List<NoteEntity> notes;
 
+    @Column(length = 20, nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
     public Long getId() {
         return id;
     }
