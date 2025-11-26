@@ -1,46 +1,32 @@
 package ru.Golov_Denis.NauJava.repository;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import ru.Golov_Denis.NauJava.model.Note;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import ru.Golov_Denis.NauJava.entity.NoteEntity;
+import ru.Golov_Denis.NauJava.repository.custom.NotesRepositoryCustom;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-@Component
-public class NotesRepository implements CrudRepository<Note, Long> {
+@Repository
+public interface NotesRepository extends CrudRepository<NoteEntity, Long>, NotesRepositoryCustom {
 
-    private final List<Note> noteContainer;
+    List<NoteEntity> findByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
 
-    @Autowired
-    public NotesRepository(List<Note> noteContainer) {
-        this.noteContainer = noteContainer;
-    }
+    @Query("select n from NoteEntity n where n.user.username = :username")
+    List<NoteEntity> findByUserUsername(@Param("username") String username);
 
-    @Override
-    public void create(Note note) {
-        noteContainer.add(note);
-    }
+    List<NoteEntity> findByTitleContainingIgnoreCase(String fragment);
 
-    @Override
-    public Note read(Long id) {
-        return noteContainer.stream()
-                .filter(note -> note.getId().equals(id))
-                .findFirst()
-                .orElse(null);
-    }
+    List<NoteEntity> findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(
+            String titleFragment,
+            String contentFragment
+    );
 
     @Override
-    public void update(Note note) {
-        for (var i = 0; i < noteContainer.size(); i++) {
-            if (noteContainer.get(i).getId().equals(note.getId())) {
-                noteContainer.set(i, note);
-                return;
-            }
-        }
-    }
-
-    @Override
-    public void delete(Long id) {
-        noteContainer.removeIf(note -> note.getId().equals(id));
-    }
+    Optional<NoteEntity> findById(Long id);
 }
